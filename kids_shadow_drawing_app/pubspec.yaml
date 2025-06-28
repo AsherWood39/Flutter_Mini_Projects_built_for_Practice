@@ -1,0 +1,35 @@
+name: kids_shadow_drawing_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image_picker: ^1.1.2    
+  permission_handler: ^12.0.0+1
+  wakelock_plus: ^1.3.2
+  camera: ^0.11.1  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+   - 'assets/Rainbow-Coloring-Page-with-Castle.jpg'
+   - 'assets/ducks.jpg'
+   - 'assets/TulipColoringPage.jpg'
+   - 'assets/Flower-Basket.png'
+   - 'assets/Rabbit.png'
+   - 'assets/Unicorn.jpg'
+   - 'assets/Reindeer.jpg'
+   - 'assets/Mushroom.png'
+   - 'assets/Strawberry.png'
+   - 'assets/Sun.png'
+   - 'assets/3d-logo-loader-resized.gif'
