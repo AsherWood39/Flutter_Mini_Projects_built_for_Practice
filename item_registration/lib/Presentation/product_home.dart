@@ -55,6 +55,19 @@ class ScreenProductHome extends StatelessWidget {
                             children: [
                               SlidableAction(
                                 onPressed: (context) {
+                                  showDeletePopUp(context, itemData.itemId);
+                                },
+                                backgroundColor: Colors.red,
+                                icon: Icons.delete,
+                                label: 'Delete',
+                              ),
+                            ],
+                          ),
+                          endActionPane: ActionPane(
+                            motion: ScrollMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (context) {
                                   ItemModel i = ItemModel(
                                     itemId: itemData.itemId,
                                     itemCategoryID: itemData.itemCategoryID,
@@ -67,19 +80,6 @@ class ScreenProductHome extends StatelessWidget {
                                 backgroundColor: Colors.blue,
                                 icon: Icons.edit,
                                 label: 'Edit',
-                              ),
-                            ],
-                          ),
-                          endActionPane: ActionPane(
-                            motion: ScrollMotion(),
-                            children: [
-                              SlidableAction(
-                                onPressed: (context) {
-                                  showDeletePopUp(context, itemData.itemId);
-                                },
-                                backgroundColor: Colors.red,
-                                icon: Icons.delete,
-                                label: 'Delete',
                               ),
                             ],
                           ),
