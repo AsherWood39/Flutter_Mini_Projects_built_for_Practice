@@ -1,6 +1,7 @@
-// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:item_registration/Core/core.dart';
 import 'package:item_registration/Infrastructure/db_functions.dart';
 import 'package:item_registration/Model/item_category_model.dart';
@@ -24,53 +25,36 @@ class ScreenProductHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    getAll();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.lightGreen,
-        title: Text(
-          'Welcome ${user.userName}',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: ListView(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * .8,
-            child: ValueListenableBuilder(
-              valueListenable: itemNotifier,
-              builder: (context, List<ItemModel> newItemList, _) {
-                return ListView.separated(
-                  itemBuilder: (context, index) {
-                    var itemData = newItemList[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.lightGreen,
-                        child: Text(
-                          '${index + 1}'.toString(),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.0,
-                            color: const Color.fromARGB(255, 21, 58, 23),
-                          ),
-                        ),
-                      ),
-                      title: Text(itemData.itemName),
-                      subtitle: Column(
-                        children: [
-                          Row(
+    return FutureBuilder(
+      future: getAllOnce(),
+      builder: (context, asyncSnapshot) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.lightGreen,
+            title: Center(
+              child: Text(
+                'Welcome ${user.userName}',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          body: ListView(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height * .8,
+                child: ValueListenableBuilder(
+                  valueListenable: itemNotifier,
+                  builder: (context, List<ItemModel> newItemList, _) {
+                    return ListView.separated(
+                      itemBuilder: (context, index) {
+                        var itemData = newItemList[index];
+                        return Slidable(
+                          key: ValueKey(itemData.itemId),
+                          startActionPane: ActionPane(
+                            motion: ScrollMotion(),
                             children: [
-                              Text('MRP: ${itemData.itemMrp}'),
-                              SizedBox(width: 10),
-                              Text('Sale Rate: ${itemData.itemSaleRate}'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(getItemCategory(itemData.itemCategoryID)),
-                              Spacer(),
-                              IconButton(
-                                onPressed: () {
+                              SlidableAction(
+                                onPressed: (context) {
                                   ItemModel i = ItemModel(
                                     itemId: itemData.itemId,
                                     itemCategoryID: itemData.itemCategoryID,
@@ -80,52 +64,92 @@ class ScreenProductHome extends StatelessWidget {
                                   );
                                   showItemEditPopUp(context, i);
                                 },
-                                icon: Icon(Icons.edit),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  showDeletePopUp(context, itemData.itemId);
-                                },
-                                icon: Icon(Icons.delete),
+                                backgroundColor: Colors.blue,
+                                icon: Icons.edit,
+                                label: 'Edit',
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                          endActionPane: ActionPane(
+                            motion: ScrollMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (context) {
+                                  showDeletePopUp(context, itemData.itemId);
+                                },
+                                backgroundColor: Colors.red,
+                                icon: Icons.delete,
+                                label: 'Delete',
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.lightGreen,
+                              child: Text(
+                                '${index + 1}'.toString(),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12.0,
+                                  color: const Color.fromARGB(255, 21, 58, 23),
+                                ),
+                              ),
+                            ),
+                            title: Text(itemData.itemName),
+                            subtitle: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text('MRP: ${itemData.itemMrp}'),
+                                    SizedBox(width: 10),
+                                    Text('Sale Rate: ${itemData.itemSaleRate}'),
+                                  ],
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    getItemCategory(itemData.itemCategoryID),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return Divider();
+                      },
+                      itemCount: newItemList.length,
                     );
                   },
-                  separatorBuilder: (context, index) {
-                    return Divider();
+                ),
+              ),
+            ],
+          ),
+          floatingActionButton: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    showItemCategoryPopUp(context);
                   },
-                  itemCount: newItemList.length,
-                );
-              },
-            ),
+                  tooltip: 'Add Category',
+                  child: Icon(Icons.category, color: Colors.pink),
+                ),
+              ),
+              Spacer(),
+              FloatingActionButton(
+                onPressed: () {
+                  showItemPopUp(context);
+                },
+                tooltip: 'Add Item',
+                child: Icon(Icons.shopping_cart_checkout, color: Colors.indigo),
+              ),
+            ],
           ),
-        ],
-      ),
-      floatingActionButton: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20),
-            child: FloatingActionButton(
-              onPressed: () {
-                showItemCategoryPopUp(context);
-              },
-              tooltip: 'Add Category',
-              child: Icon(Icons.category, color: Colors.pink),
-            ),
-          ),
-          Spacer(),
-          FloatingActionButton(
-            onPressed: () {
-              showItemPopUp(context);
-            },
-            tooltip: 'Add Item',
-            child: Icon(Icons.shopping_cart_checkout, color: Colors.indigo),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -144,9 +168,9 @@ class ScreenProductHome extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add Item Category'),
+          title: Center(child: Text('Add Item Category')),
           content: SizedBox(
-            height: 100,
+            height: 70,
             child: Form(
               key: _formItemCategory,
               child: Column(
@@ -206,9 +230,8 @@ class ScreenProductHome extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add Item '),
-          content: SizedBox(
-            height: 350,
+          title: Center(child: Text('Add Item ')),
+          content: SingleChildScrollView(
             child: Form(
               key: _formItem,
               child: Column(
@@ -257,6 +280,9 @@ class ScreenProductHome extends StatelessWidget {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Item MRP',
                       border: OutlineInputBorder(
@@ -273,6 +299,9 @@ class ScreenProductHome extends StatelessWidget {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Item Sale Rate',
                       border: OutlineInputBorder(
@@ -321,9 +350,8 @@ class ScreenProductHome extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Item '),
-          content: SizedBox(
-            height: 350,
+          title: Center(child: Text('Edit Item ')),
+          content: SingleChildScrollView(
             child: Form(
               key: _formItem,
               child: Column(
@@ -372,6 +400,9 @@ class ScreenProductHome extends StatelessWidget {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Item MRP',
                       border: OutlineInputBorder(
@@ -388,6 +419,9 @@ class ScreenProductHome extends StatelessWidget {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Item Sale Rate',
                       border: OutlineInputBorder(

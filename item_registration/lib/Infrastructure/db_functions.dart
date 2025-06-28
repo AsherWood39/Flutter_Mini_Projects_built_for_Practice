@@ -7,7 +7,7 @@ import 'package:item_registration/Model/item_category_model.dart';
 import 'package:item_registration/Model/item_model.dart';
 import 'package:item_registration/Model/user_model.dart';
 
-void getAll() async {
+Future<void> getAll() async {
   itemCategoryNotifier.value.clear();
   itemNotifier.value.clear();
   final documentSnapshot = await FirebaseFirestore.instance
@@ -38,6 +38,12 @@ void getAll() async {
     itemNotifier.value.add(item);
   }
   itemNotifier.notifyListeners();
+}
+
+Future<void> getAllOnce() async {
+  if (itemNotifier.value.isEmpty && itemCategoryNotifier.value.isEmpty) {
+    await getAll();
+  }
 }
 
 Future<bool> addItemCategory(ItemCategoryModel c) async {
